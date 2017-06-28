@@ -87,11 +87,17 @@ var UI = function() {
   countries.all(function(countryData) {
     this.render(countryData);
   }.bind(this));
+  this.attachFormOnSubmit();
 }
 
 UI.prototype = {
+  clearCountries: function() {
+    var container = document.getElementById('countries');
+    container.innerHTML = "";
+  },
   render: function(countries) {
     var container = document.getElementById('countries');
+    container.id = 'countries';
 
     for (var country of countries) {
       var countryWrapper = document.createElement('div');
@@ -108,7 +114,34 @@ UI.prototype = {
       countryWrapper.appendChild(reasonToGo);
       container.appendChild(countryWrapper);
     }
+  },
+
+  attachFormOnSubmit: function(){
+    var form = document.getElementById('new-country-form');
+
+    form.addEventListener('submit', function(event){
+      event.preventDefault();
+
+      var name = form['name-field'].value;
+      var capital = form['capital-field'].value;
+      var reason = form['reason-field'].value;
+
+      var countryToAdd = {
+        name: name,
+        capital: capital,
+        reason: reason
+      }
+
+      var allCountries = new CountryRequest();
+      allCountries.add(countryToAdd, function(newData){
+        console.log(this);
+        this.clearCountries();
+        this.render(newData);
+      }.bind(this));
+    }.bind(this));
   }
+
+
 }
 
 module.exports = UI;
@@ -133,10 +166,27 @@ CountryRequest.prototype = {
     request.send();
   },
 
+  makePostRequest: function(url, onRequestComplete, payload){
+    var request = new XMLHttpRequest();
+    request.open('POST', url);
+    request.setRequestHeader('Content-Type','application/json');
+    request.addEventListener('load', function() {
+      var jsonString =request.responseText;
+      var updatedCountry = JSON.parse(jsonString);
+      onRequestComplete(updatedCountry);
+    });
+    request.send(payload);
+  },
+
   all:function(onCountriesReady){
     this.makeRequest('http://localhost:3000/api/countries', function(allCountries) {
       onCountriesReady(allCountries);
     })
+  },
+
+  add: function(countryToAdd, callback) {
+    var jsonString =JSON.stringify(countryToAdd);
+    this.makePostRequest('http://localhost:3000/api/countries',callback,jsonString);
   }
 }
 

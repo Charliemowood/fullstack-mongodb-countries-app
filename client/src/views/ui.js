@@ -5,11 +5,17 @@ var UI = function() {
   countries.all(function(countryData) {
     this.render(countryData);
   }.bind(this));
+  this.attachFormOnSubmit();
 }
 
 UI.prototype = {
+  clearCountries: function() {
+    var container = document.getElementById('countries');
+    container.innerHTML = "";
+  },
   render: function(countries) {
     var container = document.getElementById('countries');
+    container.id = 'countries';
 
     for (var country of countries) {
       var countryWrapper = document.createElement('div');
@@ -26,7 +32,34 @@ UI.prototype = {
       countryWrapper.appendChild(reasonToGo);
       container.appendChild(countryWrapper);
     }
+  },
+
+  attachFormOnSubmit: function(){
+    var form = document.getElementById('new-country-form');
+
+    form.addEventListener('submit', function(event){
+      event.preventDefault();
+
+      var name = form['name-field'].value;
+      var capital = form['capital-field'].value;
+      var reason = form['reason-field'].value;
+
+      var countryToAdd = {
+        name: name,
+        capital: capital,
+        reason: reason
+      }
+
+      var allCountries = new CountryRequest();
+      allCountries.add(countryToAdd, function(newData){
+        console.log(this);
+        this.clearCountries();
+        this.render(newData);
+      }.bind(this));
+    }.bind(this));
   }
+
+
 }
 
 module.exports = UI;

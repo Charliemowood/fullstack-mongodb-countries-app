@@ -6,6 +6,18 @@
     <script src="bundle.js"></script>
   </head>
   <body>
+  <form id="new-country-form" action="/api/countries" method="post">
+    <label for="name-field">Name: </label>
+    <input type="text" name="name" id="name-field">
+
+    <label for="capital-field">Capital: </label>
+    <input type="text" name="capital" id="capital-field">
+
+    <label for="reason-field">Reason: </label>
+    <input type="text" name="reason" id="reason-field">
+
+    <input type="submit" value="Add Country">
+  </form>
   <div id="countries">
 
   </div>
