@@ -78,17 +78,69 @@ window.addEventListener('load', app);
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+var CountryRequest = __webpack_require__(2);
 
 var UI = function() {
-
+  var countries = new CountryRequest();
+  countries.all(function(countryData) {
+    this.render(countryData);
+  }.bind(this));
 }
 
 UI.prototype = {
+  render: function(countries) {
+    var container = document.getElementById('countries');
 
+    for (var country of countries) {
+      var countryWrapper = document.createElement('div');
+      var countryName = document.createElement('h1');
+      var capital = document.createElement('p');
+      var reasonToGo = document.createElement('p');
+
+      countryName.innerText = country.name;
+      capital.innerText = "Capital: " + country.capital;
+      reasonToGo.innerText = "Reasons: " + country.reason;
+
+      countryWrapper.appendChild(countryName);
+      countryWrapper.appendChild(capital);
+      countryWrapper.appendChild(reasonToGo);
+      container.appendChild(countryWrapper);
+    }
+  }
 }
 
 module.exports = UI;
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+var CountryRequest = function() {}
+
+CountryRequest.prototype = {
+  makeRequest: function(url, onRequestComplete){
+    var request = new XMLHttpRequest();
+    request.open('GET', url);
+    request.addEventListener('load', function() {
+      if (request.status != 200 ) return;
+      var jsonString = request.responseText;
+      var resultsData = JSON.parse(jsonString);
+      onRequestComplete(resultsData);
+    });
+    request.send();
+  },
+
+  all:function(onCountriesReady){
+    this.makeRequest('http://localhost:3000/api/countries', function(allCountries) {
+      onCountriesReady(allCountries);
+    })
+  }
+}
+
+module.exports = CountryRequest;
 
 
 /***/ })
